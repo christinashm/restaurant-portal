@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Portal — Gando Restaurant Group</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a2e; --warm: #f7f3ee; --gold: #c8963e; --gold-light: #f0ddb8;
+    --olis: #2d6a4f; --emiliano: #8b5e19; --stallion: #7b2d2d;
+    --daniellas: #4a3070; --marketplace: #1a5f7a; --oasis: #5c6b1e;
+    --muted: #6b6b7a; --border: #e0dbd3; --white: #ffffff;
+    --shadow: 0 2px 16px rgba(26,26,46,0.10); --radius: 10px;
+  }
+  html, body { min-height: 100vh; font-family: 'Georgia', serif; background: var(--warm); color: var(--ink); }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* LANDING */
+  #screen-landing { align-items: center; justify-content: center; padding: 40px 20px; background: var(--ink); }
+  .landing-inner { width: 100%; max-width: 460px; text-align: center; }
+  .venue-bars { display: flex; height: 5px; border-radius: 3px; overflow: hidden; margin-bottom: 36px; }
+  .venue-bars span { flex: 1; }
+  .v-olis{background:var(--olis)} .v-emiliano{background:var(--gold)} .v-stallion{background:var(--stallion)}
+  .v-daniellas{background:var(--daniellas)} .v-marketplace{background:var(--marketplace)} .v-oasis{background:var(--oasis)}
+  .brand-lockup { margin-bottom: 48px; }
+  .brand-lockup h1 { font-size: 2.4rem; font-weight: normal; color: var(--white); letter-spacing: 0.04em; line-height: 1.15; }
+  .tagline { margin-top: 10px; font-family: Arial,sans-serif; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+  .venues { margin-top: 14px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  .venue-pill { font-family: Arial,sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; border: 1px solid; }
+  .venue-pill.olis{color:#7ecba1;border-color:#7ecba1} .venue-pill.emiliano{color:var(--gold-light);border-color:var(--gold-light)}
+  .venue-pill.stallion{color:#e88;border-color:#e88} .venue-pill.daniellas{color:#c4aaf0;border-color:#c4aaf0}
+  .venue-pill.marketplace{color:#7dd4f0;border-color:#7dd4f0} .venue-pill.oasis{color:#c4d97a;border-color:#c4d97a}
+  .venue-pill.closed-pill{opacity:.45} .venue-pill.closed-pill::after{content:' · closed';font-size:.6rem}
+  .login-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 32px 28px; }
+  .login-box h2 { font-family: Arial,sans-serif; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+  .login-box input[type=password] { width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:12px 16px; font-size:1rem; color:var(--white); outline:none; font-family:Arial,sans-serif; }
+  .login-box input[type=password]::placeholder{color:rgba(255,255,255,0.3)}
+  .login-box input[type=password]:focus{border-color:var(--gold)}
+  .error-msg { font-family:Arial,sans-serif; font-size:0.78rem; color:#e88; margin-top:10px; min-height:20px; }
+  .btn-login { margin-top:16px; width:100%; background:var(--gold); color:var(--ink); border:none; border-radius:6px; padding:13px; font-family:Arial,sans-serif; font-size:0.82rem; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+  .btn-login:hover{background:#d9a84e}
+
+  /* SHARED HEADER */
+  .portal-header { background:var(--ink); padding:18px 32px; display:flex; align-items:center; justify-content:space-between; }
+  .portal-header .logo { font-size:1.1rem; color:var(--white); }
+  .portal-header .logo span{color:var(--gold)}
+  .btn-logout { font-family:Arial,sans-serif; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; background:transparent; border:1px solid rgba(255,255,255,0.25); color:rgba(255,255,255,0.6); padding:6px 14px; border-radius:4px; cursor:pointer; }
+  .btn-logout:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* EMPLOYEE */
+  #screen-employee{background:var(--warm)}
+  .portal-body { max-width:860px; margin:0 auto; padding:40px 24px 80px; width:100%; }
+  .portal-welcome h2 { font-size:1.7rem; font-weight:normal; margin-bottom:6px; }
+  .portal-welcome p { font-family:Arial,sans-serif; font-size:0.85rem; color:var(--muted); margin-bottom:36px; }
+  .action-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+  .action-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; cursor:pointer; transition:box-shadow .2s,transform .15s; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow); }
+  .action-card:hover{box-shadow:0 6px 28px rgba(26,26,46,.14);transform:translateY(-2px)}
+  .card-icon { width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+  .card-icon.green{background:#e8f5ed} .card-icon.amber{background:#fdf3e3}
+  .action-card h3{font-size:1.05rem;font-weight:normal;color:var(--ink)}
+  .action-card p{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);line-height:1.55}
+  .card-arrow{margin-top:auto;font-family:Arial,sans-serif;font-size:.75rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;padding-top:6px}
+
+  /* PANELS */
+  .panel-overlay{display:none;position:fixed;inset:0;background:rgba(26,26,46,.55);z-index:100;align-items:flex-end;justify-content:center}
+  .panel-overlay.open{display:flex}
+  @media(min-width:600px){.panel-overlay{align-items:center}}
+  .panel{background:var(--white);border-radius:14px 14px 0 0;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:32px 28px 40px}
+  @media(min-width:600px){.panel{border-radius:14px}}
+  .panel-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px}
+  .panel-header h2{font-size:1.3rem;font-weight:normal;color:var(--ink)}
+  .panel-header p{font-family:Arial,sans-serif;font-size:.78rem;color:var(--muted);margin-top:5px}
+  .btn-close{background:none;border:none;font-size:1.4rem;color:var(--muted);cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
+
+  /* FORMS */
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .form-group input[type=text],.form-group input[type=tel],.form-group textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:11px 14px;font-family:Arial,sans-serif;font-size:.9rem;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s}
+  .form-group input:focus,.form-group textarea:focus{border-color:var(--gold)}
+  .form-group textarea{resize:vertical;min-height:70px}
+  .form-section-title{font-family:Arial,sans-serif;font-size:.72rem;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:28px 0 14px;padding-bottom:6px;border-bottom:1px solid var(--gold-light)}
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:var(--warm);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:Arial,sans-serif;font-size:.8rem;color:var(--ink);transition:all .15s;user-select:none}
+  .chip:hover{border-color:var(--gold)}
+  .chip.selected{background:var(--ink);border-color:var(--ink);color:var(--white)}
+  .chip.disabled-chip{opacity:.45}
+  .btn-submit{width:100%;background:var(--ink);color:var(--white);border:none;border-radius:6px;padding:14px;font-family:Arial,sans-serif;font-size:.82rem;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:12px}
+  .btn-submit:hover{background:#2d2d4e}
+  .success-msg{display:none;background:#e8f5ed;border:1px solid #7ecba1;border-radius:6px;padding:14px 16px;font-family:Arial,sans-serif;font-size:.85rem;color:var(--olis);margin-top:12px;text-align:center}
+
+  /* CALENDAR */
+  .calendar-wrap{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-top:6px}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--ink);color:var(--white)}
+  .cal-nav span{font-family:Arial,sans-serif;font-size:.88rem;font-weight:bold;letter-spacing:.04em}
+  .cal-nav button{background:none;border:none;color:var(--white);font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:4px}
+  .cal-nav button:hover{background:rgba(255,255,255,.15)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--white)}
+  .cal-dow{font-family:Arial,sans-serif;font-size:.65rem;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:8px 0;color:var(--muted);background:var(--warm);border-bottom:1px solid var(--border)}
+  .cal-day{font-family:Arial,sans-serif;font-size:.82rem;text-align:center;padding:9px 4px;cursor:pointer;color:var(--ink);transition:all .15s;border:1px solid transparent;margin:1px}
+  .cal-day:hover{background:var(--gold-light);border-radius:6px}
+  .cal-day.selected{background:var(--stallion);color:var(--white);border-radius:6px;font-weight:bold}
+  .cal-day.today{border:1.5px solid var(--gold);border-radius:6px;font-weight:bold}
+  .cal-day.other-month{color:rgba(0,0,0,.2);cursor:default}
+  .cal-day.other-month:hover{background:none}
+  .selected-dates{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+  .date-tag{display:inline-flex;align-items:center;gap:6px;background:var(--warm);border:1px solid var(--border);border-radius:12px;padding:4px 10px;font-family:Arial,sans-serif;font-size:.75rem;color:var(--ink)}
+  .date-tag button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;line-height:1;padding:0}
+  .date-tag button:hover{color:var(--stallion)}
+
+  /* SCHEDULE */
+  .schedule-notice{background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);line-height:1.6}
+  .schedule-notice strong{color:var(--ink)}
+  .loc-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+  .loc-tab{font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .15s}
+  .loc-tab.active-olis{background:#e8f5ed;border-color:var(--olis);color:var(--olis)}
+  .loc-tab.active-emiliano{background:#fdf3e3;border-color:var(--emiliano);color:var(--emiliano)}
+  .loc-tab.active-stallion{background:#fdeaea;border-color:var(--stallion);color:var(--stallion)}
+  .day-tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+  .day-tab{font-family:Arial,sans-serif;font-size:.7rem;font-weight:bold;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+  .day-tab.active{background:var(--ink);border-color:var(--ink);color:var(--white)}
+  .shift-board{display:flex;flex-direction:column;gap:10px}
+  .shift-row{background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .shift-name{font-size:.95rem;color:var(--ink)}
+  .shift-meta{font-family:Arial,sans-serif;font-size:.75rem;color:var(--muted);margin-top:3px}
+  .svb{font-family:Arial,sans-serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:12px;font-weight:bold}
+  .svb-olis{background:#e8f5ed;color:var(--olis)} .svb-emiliano{background:#fdf3e3;color:var(--emiliano)} .svb-stallion{background:#fdeaea;color:var(--stallion)}
+  .btn-shift-action{font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;padding:7px 14px;border-radius:5px;border:none;cursor:pointer;transition:all .15s}
+  .btn-drop{background:#fdeaea;color:var(--stallion)} .btn-drop:hover{background:#f5c6c6}
+  .btn-take{background:#e8f5ed;color:var(--olis)} .btn-take:hover{background:#c3e6cf}
+
+  /* VERIFY MODAL */
+  .verify-overlay{display:none;position:fixed;inset:0;background:rgba(26,26,46,.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+  .verify-overlay.open{display:flex}
+  .verify-box{background:var(--white);border-radius:12px;padding:28px 24px;max-width:380px;width:100%}
+  .verify-box h3{font-size:1.1rem;font-weight:normal;color:var(--ink);margin-bottom:8px}
+  .verify-box p{font-family:Arial,sans-serif;font-size:.82rem;color:var(--muted);margin-bottom:16px;line-height:1.5}
+  .verify-box input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:10px 14px;font-family:Arial,sans-serif;font-size:.9rem;outline:none;margin-bottom:10px}
+  .verify-box input:focus{border-color:var(--gold)}
+  .verify-error{font-family:Arial,sans-serif;font-size:.78rem;color:var(--stallion);min-height:18px;margin-bottom:8px}
+  .verify-btns{display:flex;gap:8px}
+  .btn-verify-confirm{flex:1;background:var(--ink);color:var(--white);border:none;border-radius:6px;padding:10px;font-family:Arial,sans-serif;font-size:.8rem;font-weight:bold;cursor:pointer}
+  .btn-verify-cancel{flex:1;background:var(--warm);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:Arial,sans-serif;font-size:.8rem;cursor:pointer}
+
+  /* MANAGER */
+  #screen-manager{background:#0f0f1e;color:var(--white)}
+  .mgr-header{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+  .mgr-header .logo{font-size:1.1rem;color:var(--white)}
+  .mgr-header .logo span{color:var(--gold)}
+  .mgr-badge{font-family:Arial,sans-serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--ink);padding:4px 10px;border-radius:4px;font-weight:bold}
+  .mgr-body{max-width:960px;margin:0 auto;padding:40px 24px 80px;width:100%}
+  .mgr-welcome{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .mgr-welcome h2{font-size:1.7rem;font-weight:normal;color:var(--white)}
+  .mgr-welcome p{font-family:Arial,sans-serif;font-size:.83rem;color:rgba(255,255,255,.45);margin-top:6px}
+  .venue-status-bar{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .vs-badge{font-family:Arial,sans-serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:12px;border:1px solid}
+  .mgr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  .mgr-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:26px 22px;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;display:flex;flex-direction:column;gap:10px}
+  .mgr-card:hover{background:rgba(255,255,255,.09);border-color:var(--gold);transform:translateY(-2px)}
+  .mgr-card-icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:rgba(200,150,62,.15)}
+  .mgr-card h3{font-size:1rem;font-weight:normal;color:var(--white)}
+  .mgr-card p{font-family:Arial,sans-serif;font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.55}
+  .mgr-card .card-arrow{font-family:Arial,sans-serif;font-size:.72rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-top:auto;padding-top:6px}
+  .coming-soon-tag{display:inline-block;font-family:Arial,sans-serif;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:rgba(200,150,62,.18);color:var(--gold);margin-top:4px;width:fit-content}
+  .approval-queue{margin-top:32px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);overflow:hidden}
+  .queue-header{padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+  .queue-header h3{font-family:Arial,sans-serif;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:bold}
+  .queue-count{background:var(--stallion);color:var(--white);border-radius:10px;font-family:Arial,sans-serif;font-size:.7rem;font-weight:bold;padding:2px 8px}
+  .queue-empty{padding:28px;font-family:Arial,sans-serif;font-size:.83rem;color:rgba(255,255,255,.3);text-align:center}
+  .queue-item{padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .queue-item:last-child{border-bottom:none}
+  .q-info{flex:1;min-width:200px}
+  .q-name{font-size:.92rem;color:var(--white)}
+  .q-detail{font-family:Arial,sans-serif;font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px}
+  .queue-actions{display:flex;gap:8px}
+  .btn-approve{background:rgba(46,196,112,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:5px;padding:6px 14px;font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;cursor:pointer}
+  .btn-approve:hover{background:rgba(46,196,112,.28)}
+  .btn-deny{background:rgba(220,50,50,.12);color:#f87171;border:1px solid rgba(248,113,113,.25);border-radius:5px;padding:6px 14px;font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;cursor:pointer}
+  .btn-deny:hover{background:rgba(220,50,50,.22)}
+
+  /* STAFF DB */
+  .staff-db-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .staff-db-item:last-child{border-bottom:none}
+  .staff-db-row{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .staff-db-name{font-size:.95rem;color:var(--white)}
+  .staff-db-meta{font-family:Arial,sans-serif;font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px}
+  .btn-edit-staff{background:rgba(200,150,62,.15);color:var(--gold);border:1px solid rgba(200,150,62,.3);border-radius:5px;padding:5px 12px;font-family:Arial,sans-serif;font-size:.72rem;font-weight:bold;cursor:pointer;margin-left:auto;flex-shrink:0}
+  .btn-edit-staff:hover{background:rgba(200,150,62,.28)}
+  .btn-deactivate{background:rgba(220,50,50,.1);color:#f87171;border:1px solid rgba(248,113,113,.2);border-radius:5px;padding:5px 12px;font-family:Arial,sans-serif;font-size:.72rem;font-weight:bold;cursor:pointer}
+  .staff-edit-form{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:16px;margin-top:10px;display:none}
+  .staff-edit-form.open{display:block}
+  .edit-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .edit-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+  .edit-field label{font-family:Arial,sans-serif;font-size:.68rem;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+  .edit-field input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:var(--white);padding:8px 10px;font-family:Arial,sans-serif;font-size:.82rem;outline:none;width:100%}
+  .edit-field input:focus{border-color:var(--gold)}
+  .edit-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .edit-chip{font-family:Arial,sans-serif;font-size:.72rem;padding:4px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
+  .edit-chip.selected{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:bold}
+  .edit-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .btn-save-staff{background:#4ade80;color:#052e16;border:none;border-radius:5px;padding:7px 16px;font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;cursor:pointer}
+  .btn-cancel-edit{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:none;border-radius:5px;padding:7px 14px;font-family:Arial,sans-serif;font-size:.75rem;cursor:pointer}
+  .btn-add-staff{width:100%;background:rgba(200,150,62,.12);border:1px dashed rgba(200,150,62,.4);border-radius:8px;color:var(--gold);font-family:Arial,sans-serif;font-size:.8rem;font-weight:bold;padding:12px;cursor:pointer;margin-top:14px}
+  .btn-add-staff:hover{background:rgba(200,150,62,.22)}
+  .inactive-tag{display:inline-block;font-family:Arial,sans-serif;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:8px;background:rgba(220,50,50,.15);color:#f87171;margin-left:8px;vertical-align:middle}
+  .saving-indicator{font-family:Arial,sans-serif;font-size:.72rem;color:rgba(255,255,255,.35);margin-left:8px}
+
+  /* TOR */
+  .tor-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+  .tor-name{font-size:.95rem;color:var(--white);margin-bottom:4px}
+  .tor-detail{font-family:Arial,sans-serif;font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6}
+  .tor-badge{display:inline-block;font-family:Arial,sans-serif;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;margin-right:6px;margin-bottom:4px}
+  .tor-badge.perm{background:rgba(200,150,62,.2);color:var(--gold)}
+  .tor-badge.oneoff{background:rgba(74,222,128,.15);color:#4ade80}
+
+  /* BRAIN */
+  #panel-brain .panel{max-width:780px;height:90vh;display:flex;flex-direction:column;padding:0;background:#0f0f1e;border-radius:14px 14px 0 0}
+  @media(min-width:600px){#panel-brain .panel{border-radius:14px}}
+  .brain-header{padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
+  .brain-header h2{font-size:1.15rem;font-weight:normal;color:var(--white)}
+  .brain-header p{font-family:Arial,sans-serif;font-size:.75rem;color:rgba(255,255,255,.35);margin-top:4px}
+  .brain-week-bar{padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+  .brain-week-bar label{font-family:Arial,sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+  .brain-week-bar input[type=date]{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:var(--white);padding:6px 10px;font-family:Arial,sans-serif;font-size:.82rem;outline:none;color-scheme:dark}
+  .btn-draft{background:var(--gold);color:var(--ink);border:none;border-radius:5px;padding:7px 16px;font-family:Arial,sans-serif;font-size:.75rem;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+  .btn-draft:hover{background:#d9a84e} .btn-draft:disabled{opacity:.5;cursor:not-allowed}
+  .brain-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+  .msg{display:flex;gap:10px;align-items:flex-start}
+  .msg.user{flex-direction:row-reverse}
+  .msg-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+  .msg.assistant .msg-avatar{background:rgba(200,150,62,.2)} .msg.user .msg-avatar{background:rgba(255,255,255,.1)}
+  .msg-bubble{max-width:85%;padding:12px 16px;border-radius:12px;font-family:Arial,sans-serif;font-size:.83rem;line-height:1.65}
+  .msg.assistant .msg-bubble{background:rgba(255,255,255,.06);color:rgba(255,255,255,.88);border-radius:4px 12px 12px 12px}
+  .msg.user .msg-bubble{background:rgba(200,150,62,.18);color:rgba(255,255,255,.9);border-radius:12px 4px 12px 12px;text-align:right}
+  .typing-indicator{display:flex;gap:4px;align-items:center;padding:4px 0}
+  .typing-indicator span{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:bounce 1.2s infinite;opacity:.6}
+  .typing-indicator span:nth-child(2){animation-delay:.2s} .typing-indicator span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+  .brain-quick-btns{padding:0 24px 12px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+  .quick-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;color:rgba(255,255,255,.6);font-family:Arial,sans-serif;font-size:.72rem;padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .quick-btn:hover{background:rgba(200,150,62,.15);border-color:var(--gold);color:var(--gold)}
+  .brain-input-bar{padding:14px 24px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;align-items:flex-end;flex-shrink:0}
+  .brain-input-bar textarea{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:var(--white);padding:10px 14px;font-family:Arial,sans-serif;font-size:.85rem;resize:none;outline:none;min-height:42px;max-height:120px;line-height:1.5;transition:border-color .2s}
+  .brain-input-bar textarea:focus{border-color:var(--gold)}
+  .brain-input-bar textarea::placeholder{color:rgba(255,255,255,.25)}
+  .btn-send{background:var(--gold);color:var(--ink);border:none;border-radius:8px;width:42px;height:42px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .btn-send:hover{background:#d9a84e} .btn-send:disabled{opacity:.4;cursor:not-allowed}
+
+  @media(max-width:480px){
+    .brand-lockup h1{font-size:1.9rem}
+    .portal-body,.mgr-body{padding:24px 16px 60px}
+    .panel{padding:24px 18px 32px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-inner">
+    <div class="venue-bars">
+      <span class="v-olis"></span><span class="v-emiliano"></span><span class="v-stallion"></span>
+      <span class="v-daniellas"></span><span class="v-marketplace"></span><span class="v-oasis"></span>
+    </div>
+    <div class="brand-lockup">
+      <h1>Staff Portal</h1>
+      <div class="tagline">Team Access · Schedule · Shifts</div>
+      <div class="venues">
+        <span class="venue-pill olis">Olis</span><span class="venue-pill emiliano">Emiliano</span>
+        <span class="venue-pill stallion">Stallion</span><span class="venue-pill daniellas closed-pill">Daniella's</span>
+        <span class="venue-pill marketplace closed-pill">Marketplace</span><span class="venue-pill oasis closed-pill">Oasis</span>
+      </div>
+    </div>
+    <div class="login-box">
+      <h2>Enter your access code</h2>
+      <input type="password" id="login-input" placeholder="Password" autocomplete="off" />
+      <div class="error-msg" id="login-error"></div>
+      <button class="btn-login" onclick="handleLogin()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMPLOYEE PORTAL -->
+<div id="screen-employee" class="screen">
+  <header class="portal-header">
+    <div class="logo">Staff <span>Portal</span></div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </header>
+  <div class="portal-body">
+    <div class="portal-welcome">
+      <h2>Welcome back.</h2>
+      <p>Submit time-off requests, view the schedule, and manage your shifts.</p>
+    </div>
+    <div class="action-cards">
+      <div class="action-card" onclick="openPanel('panel-request-off')">
+        <div class="card-icon green">📅</div>
+        <h3>Request Off</h3>
+        <p>Submit your availability, permanent days off, and specific dates you need off. Saved directly to management.</p>
+        <div class="card-arrow">Submit Request →</div>
+      </div>
+      <div class="action-card" onclick="openSchedulePanel()">
+        <div class="card-icon amber">📋</div>
+        <h3>Current Schedule</h3>
+        <p>View the live schedule by location. Request to drop or pick up a shift — all changes require management approval.</p>
+        <div class="card-arrow">View Schedule →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGER PORTAL -->
+<div id="screen-manager" class="screen">
+  <header class="mgr-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="logo">Staff <span>Portal</span></div>
+      <span class="mgr-badge">Management</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </header>
+  <div class="mgr-body">
+    <div class="mgr-welcome">
+      <h2>Management Dashboard</h2>
+      <p>Build schedules, manage staff, review requests.</p>
+      <div class="venue-status-bar">
+        <span class="vs-badge" style="border-color:#7ecba1;color:#7ecba1;">Olis · Open</span>
+        <span class="vs-badge" style="border-color:#f0ddb8;color:#f0ddb8;">Emiliano · Open</span>
+        <span class="vs-badge" style="border-color:#e88;color:#e88;">Stallion · Open</span>
+        <span class="vs-badge" style="border-color:rgba(196,170,240,.35);color:rgba(196,170,240,.45);">Daniella's · Closed</span>
+        <span class="vs-badge" style="border-color:rgba(125,212,240,.35);color:rgba(125,212,240,.45);">Marketplace · Closed</span>
+        <span class="vs-badge" style="border-color:rgba(196,217,122,.35);color:rgba(196,217,122,.45);">Oasis · Closed</span>
+      </div>
+    </div>
+    <div class="mgr-grid">
+      <div class="mgr-card" onclick="openPanel('panel-staff-db')">
+        <div class="mgr-card-icon">👥</div>
+        <h3>Staff Database</h3>
+        <p>All active employees — name, role, locations, and availability. Click any record to edit.</p>
+        <div class="card-arrow">Manage Staff →</div>
+      </div>
+      <div class="mgr-card" onclick="openSchedulePanel()">
+        <div class="mgr-card-icon">📋</div>
+        <h3>Current Schedule</h3>
+        <p>View the live schedule by location and approve or deny shift change requests.</p>
+        <div class="card-arrow">View Schedule →</div>
+      </div>
+      <div class="mgr-card" onclick="openBrain()">
+        <div class="mgr-card-icon">🤖</div>
+        <h3>Build Schedule</h3>
+        <p>Generate a new weekly schedule using the AI brain. Knows your rules, staff, and time-off requests.</p>
+        <div class="card-arrow">Open Brain →</div>
+      </div>
+      <div class="mgr-card" onclick="openPanel('panel-time-off-mgr')">
+        <div class="mgr-card-icon">📅</div>
+        <h3>Time-Off Requests</h3>
+        <p>All requests submitted by staff — permanent days off and specific dates, saved from their phones.</p>
+        <div class="card-arrow">Review Requests →</div>
+      </div>
+      <div class="mgr-card" onclick="alert('Rules editor coming soon.')">
+        <div class="mgr-card-icon">⚙️</div>
+        <h3>Scheduling Rules</h3>
+        <p>Edit coverage requirements, venue hours, and seasonal changes. No code required.</p>
+        <div class="coming-soon-tag">Coming Soon</div>
+        <div class="card-arrow">Edit Rules →</div>
+      </div>
+      <div class="mgr-card" onclick="alert('OpenTable + Google Calendar coming soon.')">
+        <div class="mgr-card-icon">📊</div>
+        <h3>Reservations & Events</h3>
+        <p>See how busy each venue is based on OpenTable and Google Calendar data.</p>
+        <div class="coming-soon-tag">Coming Soon</div>
+        <div class="card-arrow">View Data →</div>
+      </div>
+    </div>
+    <div class="approval-queue">
+      <div class="queue-header">
+        <h3>Pending Shift Changes</h3>
+        <span class="queue-count" id="queue-count">0</span>
+      </div>
+      <div id="queue-list"><div class="queue-empty">No pending requests — you're all caught up.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: REQUEST OFF -->
+<div class="panel-overlay" id="panel-request-off" onclick="closeOnOverlay(event,'panel-request-off')">
+  <div class="panel">
+    <div class="panel-header">
+      <div><h2>Request Off</h2><p>Your submission is saved directly to management.</p></div>
+      <button class="btn-close" onclick="closePanel('panel-request-off')">✕</button>
+    </div>
+
+    <div class="form-section-title">Your Info</div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="ro-name" placeholder="First and last name" />
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" id="ro-phone" placeholder="(555) 000-0000" />
+    </div>
+
+    <div class="form-section-title">Role & Locations</div>
+    <div class="form-group">
+      <label>Job Title(s) — select all that apply</label>
+      <div class="chip-group" id="chips-roles">
+        <div class="chip" onclick="toggleChip(this)" data-val="Server">Server</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Bartender">Bartender</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Busser">Busser</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Host/Hostess">Host / Hostess</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Manager">Manager</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Asst. Manager">Asst. Manager</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Locations I Work — select all that apply</label>
+      <div class="chip-group" id="chips-locations">
+        <div class="chip" onclick="toggleChip(this)" data-val="Olis">Olis</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Emiliano">Emiliano</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Stallion">Stallion</div>
+        <div class="chip disabled-chip" onclick="toggleChip(this)" data-val="Daniella's">Daniella's <span style="font-size:.7rem;opacity:.7;">(closed)</span></div>
+        <div class="chip disabled-chip" onclick="toggleChip(this)" data-val="Marketplace">Marketplace <span style="font-size:.7rem;opacity:.7;">(closed)</span></div>
+        <div class="chip disabled-chip" onclick="toggleChip(this)" data-val="Oasis">Oasis <span style="font-size:.7rem;opacity:.7;">(closed)</span></div>
+      </div>
+    </div>
+
+    <div class="form-section-title">Availability</div>
+    <div class="form-group">
+      <label>Days I can never work (permanent)</label>
+      <div class="chip-group" id="chips-perm-days">
+        <div class="chip" onclick="toggleChip(this)" data-val="Sunday">Sun</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Monday">Mon</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Tuesday">Tue</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Wednesday">Wed</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Thursday">Thu</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Friday">Fri</div>
+        <div class="chip" onclick="toggleChip(this)" data-val="Saturday">Sat</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Request Off Dates — tap dates on the calendar</label>
+      <div class="calendar-wrap">
+        <div class="cal-nav">
+          <button onclick="calPrev()">‹</button>
+          <span id="cal-month-label"></span>
+          <button onclick="calNext()">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-dow">Su</div><div class="cal-dow">Mo</div><div class="cal-dow">Tu</div>
+          <div class="cal-dow">We</div><div class="cal-dow">Th</div><div class="cal-dow">Fr</div><div class="cal-dow">Sa</div>
+          <div id="cal-days"></div>
+        </div>
+      </div>
+      <div class="selected-dates" id="selected-dates-display"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Notes for management</label>
+      <textarea id="ro-notes" placeholder="e.g. prefer dinner shifts, can't do doubles on Thursdays…"></textarea>
+    </div>
+
+    <button class="btn-submit" onclick="submitRequestOff()">Submit Request</button>
+    <div class="success-msg" id="ro-success">✓ Saved! Management can see your request right now.</div>
+  </div>
+</div>
+
+<!-- PANEL: SCHEDULE -->
+<div class="panel-overlay" id="panel-schedule" onclick="closeOnOverlay(event,'panel-schedule')">
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-header">
+      <div><h2>Current Schedule</h2><p id="schedule-week-label">Week of June 10 – 16, 2026</p></div>
+      <button class="btn-close" onclick="closePanel('panel-schedule')">✕</button>
+    </div>
+    <div class="schedule-notice">
+      <strong>Shift changes require management approval.</strong> Use Drop or Pick Up — you'll be notified when approved or denied.
+    </div>
+    <div class="loc-tabs">
+      <button class="loc-tab active-olis" id="tab-olis" onclick="switchLoc('olis')">🌿 Olis</button>
+      <button class="loc-tab" id="tab-emiliano" onclick="switchLoc('emiliano')">🍋 Emiliano</button>
+      <button class="loc-tab" id="tab-stallion" onclick="switchLoc('stallion')">🐎 Stallion</button>
+    </div>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div class="shift-board" id="shift-board"></div>
+  </div>
+</div>
+
+<!-- PANEL: STAFF DATABASE -->
+<div class="panel-overlay" id="panel-staff-db" onclick="closeOnOverlay(event,'panel-staff-db')">
+  <div class="panel" style="max-width:700px;background:#0f0f1e;">
+    <div class="panel-header">
+      <div>
+        <h2 style="color:#fff;">Staff Database</h2>
+        <p>Click Edit to update any record. Changes save automatically. <span class="saving-indicator" id="db-saving"></span></p>
+      </div>
+      <button class="btn-close" style="color:rgba(255,255,255,.4);" onclick="closePanel('panel-staff-db')">✕</button>
+    </div>
+    <div id="staff-db-list"></div>
+    <button class="btn-add-staff" onclick="addNewStaff()">+ Add New Staff Member</button>
+  </div>
+</div>
+
+<!-- PANEL: TIME-OFF REQUESTS -->
+<div class="panel-overlay" id="panel-time-off-mgr" onclick="closeOnOverlay(event,'panel-time-off-mgr')">
+  <div class="panel" style="max-width:680px;background:#0f0f1e;">
+    <div class="panel-header">
+      <div><h2 style="color:#fff;">Time-Off Requests</h2><p>Submitted by staff — synced live from their phones.</p></div>
+      <button class="btn-close" style="color:rgba(255,255,255,.4);" onclick="closePanel('panel-time-off-mgr')">✕</button>
+    </div>
+    <div id="tor-list"><div class="queue-empty">No requests yet.</div></div>
+  </div>
+</div>
+
+<!-- PANEL: BRAIN -->
+<div class="panel-overlay" id="panel-brain" onclick="closeOnOverlay(event,'panel-brain')">
+  <div class="panel">
+    <div class="brain-header">
+      <div><h2>🤖 Scheduling Brain</h2><p>Knows your rules, staff, and time-off requests.</p></div>
+      <button class="btn-close" style="color:rgba(255,255,255,.4);" onclick="closePanel('panel-brain')">✕</button>
+    </div>
+    <div class="brain-week-bar">
+      <label>Week starting (Wednesday)</label>
+      <input type="date" id="brain-week-input" />
+      <button class="btn-draft" id="btn-draft-schedule" onclick="draftSchedule()">Draft Schedule</button>
+    </div>
+    <div class="brain-messages" id="brain-messages">
+      <div class="msg assistant">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble">Hi! I'm your scheduling brain. I know your rules, staff, and all submitted time-off requests.<br><br>Pick a week above and hit <strong>Draft Schedule</strong>.</div>
+      </div>
+    </div>
+    <div class="brain-quick-btns">
+      <button class="quick-btn" onclick="quickMsg('Who has time off this week?')">Who has time off?</button>
+      <button class="quick-btn" onclick="quickMsg('Check for 40-hour violations')">Check 40hr cap</button>
+      <button class="quick-btn" onclick="quickMsg('Who is managing Emiliano each day?')">Emiliano managers</button>
+      <button class="quick-btn" onclick="quickMsg('Show Stallion coverage this week')">Stallion coverage</button>
+      <button class="quick-btn" onclick="quickMsg('Is Oscar or Arturo working Sunday?')">Oscar/Arturo Sunday</button>
+    </div>
+    <div class="brain-input-bar">
+      <textarea id="brain-input" placeholder="Correct the schedule or ask a question…" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendBrainMessage()}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="btn-send" id="btn-send" onclick="sendBrainMessage()">↑</button>
+    </div>
+  </div>
+</div>
+
+<!-- VERIFY MODAL -->
+<div class="verify-overlay" id="verify-modal">
+  <div class="verify-box">
+    <h3 id="verify-title">Confirm your identity</h3>
+    <p id="verify-desc">Type your full name exactly as it appears on the schedule.</p>
+    <input type="text" id="verify-input" placeholder="Your full name" />
+    <div class="verify-error" id="verify-error"></div>
+    <div class="verify-btns">
+      <button class="btn-verify-cancel" onclick="closeVerify()">Cancel</button>
+      <button class="btn-verify-confirm" onclick="confirmVerify()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER = 'https://restaurant-brain.christina-329.workers.dev';
+const EMPLOYEE_PASS = 'staff2026';
+const MANAGER_PASS  = 'mgmt2026';
+
+// ── KV STORAGE ──
+async function kvGet(key) {
+  try {
+    const r = await fetch(`${WORKER}/data?key=${encodeURIComponent(key)}`);
+    const d = await r.json();
+    return d.value;
+  } catch(e) { console.error('kvGet error', e); return null; }
+}
+
+async function kvSet(key, value) {
+  try {
+    await fetch(`${WORKER}/data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value })
+    });
+  } catch(e) { console.error('kvSet error', e); }
+}
+
+// ── STATE ──
+let currentRole = null;
+let pendingRequests = [];
+let timeOffRequests = [];
+let verifyShiftId = null;
+let currentLoc = 'olis';
+let currentDay = 0;
+
+// ── LOGIN ──
+function handleLogin() {
+  const val = document.getElementById('login-input').value.trim();
+  const err = document.getElementById('login-error');
+  if (val === MANAGER_PASS) {
+    currentRole = 'manager';
+    showScreen('screen-manager');
+    loadStaffDB();
+    loadTOR();
+  } else if (val === EMPLOYEE_PASS) {
+    currentRole = 'employee';
+    showScreen('screen-employee');
+  } else {
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('login-input').value = '';
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+document.getElementById('login-input').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+function logout() {
+  currentRole = null;
+  document.getElementById('login-input').value = '';
+  showScreen('screen-landing');
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── PANELS ──
+function openPanel(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closePanel(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+function closeOnOverlay(e, id) { if (e.target === document.getElementById(id)) closePanel(id); }
+function toggleChip(el) { el.classList.toggle('selected'); }
+function getSelectedChips(groupId) {
+  return Array.from(document.querySelectorAll(`#${groupId} .chip.selected`)).map(c => c.dataset.val);
+}
+
+// ── CALENDAR ──
+let calYear, calMonth, selectedDates = [];
+
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  selectedDates = [];
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${monthNames[calMonth]} ${calYear}`;
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  // Prev month filler
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const isSelected = selectedDates.includes(dateStr);
+    html += `<div class="cal-day${isToday?' today':''}${isSelected?' selected':''}" onclick="toggleDate('${dateStr}',this)">${d}</div>`;
+  }
+  // Next month filler
+  const total = firstDay + daysInMonth;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= remaining; d++) {
+    html += `<div class="cal-day other-month">${d}</div>`;
+  }
+  document.getElementById('cal-days').outerHTML = `<div id="cal-days" style="display:contents">${html}</div>`;
+  renderSelectedDates();
+}
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+
+function toggleDate(dateStr, el) {
+  const idx = selectedDates.indexOf(dateStr);
+  if (idx === -1) { selectedDates.push(dateStr); el.classList.add('selected'); }
+  else { selectedDates.splice(idx, 1); el.classList.remove('selected'); }
+  renderSelectedDates();
+}
+
+function removeDate(dateStr) {
+  selectedDates = selectedDates.filter(d => d !== dateStr);
+  renderCalendar();
+}
+
+function renderSelectedDates() {
+  const el = document.getElementById('selected-dates-display');
+  if (!el) return;
+  if (selectedDates.length === 0) { el.innerHTML = ''; return; }
+  const sorted = [...selectedDates].sort();
+  el.innerHTML = sorted.map(d => {
+    const dt = new Date(d + 'T12:00:00');
+    const label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+    return `<div class="date-tag">${label}<button onclick="removeDate('${d}')">×</button></div>`;
+  }).join('');
+}
+
+// Open panel hook to init calendar
+const origOpenPanel = openPanel;
+function openPanel(id) {
+  origOpenPanel(id);
+  if (id === 'panel-request-off') initCalendar();
+}
+
+// ── REQUEST OFF SUBMIT ──
+async function submitRequestOff() {
+  const name = document.getElementById('ro-name').value.trim();
+  if (!name) { alert('Please enter your full name.'); return; }
+  const btn = document.querySelector('#panel-request-off .btn-submit');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  const req = {
+    id: Date.now(),
+    name,
+    phone: document.getElementById('ro-phone').value.trim(),
+    roles: getSelectedChips('chips-roles'),
+    locations: getSelectedChips('chips-locations'),
+    permDays: getSelectedChips('chips-perm-days'),
+    dates: [...selectedDates].sort(),
+    notes: document.getElementById('ro-notes').value.trim(),
+    submitted: new Date().toLocaleDateString()
+  };
+
+  // Load existing, add new, save back
+  let existing = await kvGet('time_off_requests') || [];
+  // Replace if same name already exists, else append
+  const idx = existing.findIndex(r => r.name.toLowerCase() === name.toLowerCase());
+  if (idx !== -1) existing[idx] = req;
+  else existing.push(req);
+  await kvSet('time_off_requests', existing);
+
+  btn.textContent = 'Submit Request';
+  btn.disabled = false;
+  document.getElementById('ro-success').style.display = 'block';
+  setTimeout(() => document.getElementById('ro-success').style.display = 'none', 4000);
+}
+
+// ── TOR (manager) ──
+async function loadTOR() {
+  const data = await kvGet('time_off_requests') || [];
+  timeOffRequests = data;
+  renderTOR();
+}
+
+function renderTOR() {
+  const el = document.getElementById('tor-list');
+  if (!el) return;
+  if (timeOffRequests.length === 0) {
+    el.innerHTML = '<div class="queue-empty">No requests submitted yet.</div>';
+    return;
+  }
+  el.innerHTML = timeOffRequests.map(r => `
+    <div class="tor-item">
+      <div class="tor-name">${r.name} <span style="font-family:Arial,sans-serif;font-size:.7rem;color:rgba(255,255,255,.3);">· ${r.submitted}</span></div>
+      <div class="tor-detail" style="margin-top:6px;">
+        ${r.roles&&r.roles.length?`<div><strong style="color:rgba(255,255,255,.6);">Roles:</strong> ${r.roles.join(', ')}</div>`:''}
+        ${r.locations&&r.locations.length?`<div><strong style="color:rgba(255,255,255,.6);">Locations:</strong> ${r.locations.join(', ')}</div>`:''}
+        ${r.phone?`<div><strong style="color:rgba(255,255,255,.6);">Phone:</strong> ${r.phone}</div>`:''}
+        ${r.permDays&&r.permDays.length?`<div style="margin-top:6px;"><span class="tor-badge perm">Permanent Off</span>${r.permDays.join(', ')}</div>`:''}
+        ${r.dates&&r.dates.length?`<div style="margin-top:4px;"><span class="tor-badge oneoff">Specific Dates</span>${r.dates.map(d=>{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',weekday:'short'})}).join(', ')}</div>`:''}
+        ${r.notes?`<div style="margin-top:6px;font-style:italic;color:rgba(255,255,255,.4);">"${r.notes}"</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── SCHEDULE ──
+const weekDays = ['Wed 6/10','Thu 6/11','Fri 6/12','Sat 6/13','Sun 6/14','Mon 6/15','Tue 6/16'];
+const scheduleData = {
+  olis: [
+    {name:'Dessalines Charles',role:'Server',shifts:['4:00 PM','OFF','10:30 AM','OFF','7:30 AM','OFF','R.O.'],hours:[6,0,8.5,0,7,0,0]},
+    {name:'Prence',role:'Server',shifts:['10:30 AM','10:30 AM','4:00 PM','8:30 AM','OFF','P.R.','OFF'],hours:[8.5,8.5,6,8.5,0,0,0]},
+    {name:'Pablo Montalvo',role:'Server',shifts:['OFF','4:00 PM','10:30 AM','4:00 PM','7:30 AM','10:30 AM','OFF'],hours:[0,6,8.5,6,7,8.5,0]},
+    {name:'Aron Prime',role:'Server',shifts:['4:00 PM','OFF','4:00 PM','4:00 PM','OFF','4:00 PM','OFF'],hours:[6,0,6,6,0,6,0]},
+    {name:'Nicholas',role:'Server',shifts:['4:00 PM','OFF','OFF','4:00 PM','OFF','4:00 PM','10:30 AM'],hours:[6,0,0,6,0,6,8.5]},
+    {name:'Lucas Santos',role:'Server',shifts:['OFF','4:00 PM','4:00 PM','OFF','OFF','10:30 AM','4:00 PM'],hours:[0,6,6,0,0,8.5,6]},
+    {name:'Juanito',role:'Server',shifts:['P.R.','4:00 PM','4:00 PM','4:00 PM','4:00 PM','P.R.','P.R.'],hours:[0,6,6,6,6,0,0]},
+    {name:'Diego Alejandro',role:'Server',shifts:['OFF','4:00 PM','OFF','10:30 AM','4:00 PM','OFF','10:30 AM'],hours:[0,6,0,8.5,6,0,8.5]},
+    {name:'Diego',role:'Server',shifts:['10:30 AM','OFF','4:00 PM','4:00 PM','OFF','OFF','4:00 PM'],hours:[8.5,0,6,6,0,0,6]},
+    {name:'Lavander',role:'Server',shifts:['R.O.','R.O.','4:00 PM','4:00 PM','4:00 PM','Office','OFF'],hours:[0,0,6,6,6,6,0]},
+    {name:'Javier Storace',role:'Busser',shifts:['4:00 PM','4:00 PM','OFF','OFF','OFF','OFF','OFF'],hours:[6,6,0,0,0,0,0]},
+    {name:'David',role:'Busser',shifts:['OFF','OFF','4:00 PM','4:00 PM','OFF','OFF','OFF'],hours:[0,0,6,6,0,0,0]},
+    {name:'Luciano',role:'Busser',shifts:['OFF','OFF','OFF','OFF','4:00 PM','4:00 PM','4:00 PM'],hours:[0,0,0,0,6,6,6]},
+    {name:'Isabella Richardson',role:'Hostess',shifts:['OFF','OFF','5:00 PM','OFF','11:00 AM','OFF','OFF'],hours:[0,0,6,0,6,0,0]},
+    {name:'Valeria',role:'Hostess',shifts:['OFF','OFF','OFF','5:00 PM','OFF','OFF','OFF'],hours:[0,0,0,6,0,0,0]},
+    {name:'Kirsten Melock',role:'Bartender',shifts:['4:00 PM','4:00 PM','4:00 PM','OFF','OFF','OFF','4:00 PM'],hours:[6,6,6,0,0,0,6]},
+    {name:'Hanna',role:'Bartender',shifts:['OFF','OFF','OFF','4:00 PM','4:00 PM','4:00 PM','OFF'],hours:[0,0,0,6,6,6,0]},
+    {name:'Oscar Vigil',role:'Manager',shifts:['4:00 PM','4:00 PM','4:00 PM','OFF','OFF','4:00 PM','4:00 PM'],hours:[6,6,6,0,0,6,6]},
+    {name:'Arturo Vigil',role:'Manager',shifts:['OFF','OFF','P.R.','P.R.','10:30 AM DBL','P.R.','OFF'],hours:[0,0,0,0,8.5,0,0]},
+  ],
+  emiliano: [
+    {name:'Darius',role:'Server/Mgr',shifts:['3:45 PM','OFF','OFF','3:45 PM Mgr','3:45 PM Mgr','OFF','P.R.'],hours:[6,0,0,6,6,0,0]},
+    {name:'Eli',role:'Server',shifts:['3:45 PM','3:45 PM','OFF','3:45 PM','OFF','3:45 PM','P.R.'],hours:[6,6,0,6,0,6,0]},
+    {name:'Bryce',role:'Server',shifts:['3:45 PM','OFF','3:45 PM','R.O.','3:45 PM','OFF','OFF'],hours:[6,0,6,0,6,0,0]},
+    {name:'Crislady S',role:'Server',shifts:['OFF','OFF','3:45 PM','3:45 PM','OFF','OFF','3:45 PM'],hours:[0,0,6,6,0,0,6]},
+    {name:'Devon Fernandez',role:'Server',shifts:['OFF','3:45 PM','3:45 PM','3:45 PM','R.O.','P.R.','OFF'],hours:[0,6,6,6,0,0,0]},
+    {name:'Kaylee Rangel',role:'Server',shifts:['OFF','3:45 PM','3:45 PM','3:45 PM','OFF','3:45 PM','OFF'],hours:[0,6,6,6,0,6,0]},
+    {name:'Denham Bryant',role:'Busser',shifts:['OFF','OFF','3:45 PM','3:45 PM','OFF','OFF','OFF'],hours:[0,0,6,6,0,0,0]},
+    {name:'Anthony Oliviera',role:'Busser',shifts:['OFF','OFF','3:45 PM','OFF','OFF','OFF','OFF'],hours:[0,0,6,0,0,0,0]},
+    {name:'Reiden Z.',role:'Hostess',shifts:['OFF','OFF','OFF','OFF','4:00 PM','4:00 PM','OFF'],hours:[0,0,0,0,6,6,0]},
+    {name:'Chole Haynes',role:'Bartender',shifts:['3:30 PM','3:30 PM','OFF','OFF','OFF','OFF','OFF'],hours:[6,6,0,0,0,0,0]},
+    {name:'Alex Rollo',role:'Bartender',shifts:['OFF','Bart & Close','OFF','3:30 PM','3:30 PM','Bart & Close','Bart & Close'],hours:[0,6,0,6,6,6,6]},
+    {name:'Hanna',role:'Bartender',shifts:['OFF','OFF','3:30 PM','OFF','OFF','OFF','OFF'],hours:[0,0,6,0,0,0,0]},
+    {name:'Andres Cardenas',role:'Manager',shifts:['3:00 PM Mgr','OFF','3:00 PM Mgr','OFF','OFF','OFF','OFF'],hours:[6,0,6,0,0,0,0]},
+    {name:'Arturo Vigil',role:'Manager',shifts:['OFF','3:00 PM Mgr','OFF','OFF','OFF','OFF','OFF'],hours:[0,6,0,0,0,0,0]},
+    {name:'Juan Gando',role:'Manager',shifts:['OFF','OFF','OFF','OFF','OFF','3:00 PM Mgr','3:00 PM Mgr'],hours:[0,0,0,0,0,6,6]},
+  ],
+  stallion: [
+    {name:'Juan Gando',role:'Manager',shifts:['4:00 PM Mgr','OFF','4:00 PM Mgr','4:00 PM Mgr','CLOSED','CLOSED','OFF'],hours:[6,0,6,6,0,0,0]},
+    {name:'Andres Cardenas',role:'Manager',shifts:['OFF','4:00 PM Mgr','OFF','OFF','CLOSED','CLOSED','4:00 PM Mgr'],hours:[0,6,0,0,0,0,6]},
+    {name:'Chey',role:'Bartender',shifts:['4:00 PM','4:00 PM','4:00 PM','4:00 PM','CLOSED','CLOSED','4:00 PM'],hours:[6,6,6,6,0,0,6]},
+    {name:'Emiliano Gando',role:'Server',shifts:['OFF','OFF','10:30 AM DBL','4:00 PM','CLOSED','CLOSED','P.R.'],hours:[0,0,8.5,6,0,0,0]},
+    {name:'Jaden Jacobs',role:'Server',shifts:['OFF','OFF','P.R.','10:30 AM DBL','CLOSED','CLOSED','4:00 PM'],hours:[0,0,0,8.5,0,0,6]},
+    {name:'Katherina Vigil',role:'Server',shifts:['10:30 AM DBL','4:00 PM','OFF','4:00 PM','CLOSED','CLOSED','OFF'],hours:[8.5,6,0,6,0,0,0]},
+    {name:'Sophia Heiden',role:'Server',shifts:['OFF','10:30 AM DBL','OFF','OFF','CLOSED','CLOSED','10:30 AM DBL'],hours:[0,8.5,0,0,0,0,8.5]},
+  ]
+};
+
+function openSchedulePanel() {
+  currentLoc = 'olis'; currentDay = 0;
+  buildDayTabs(); buildShiftBoard(); updateLocTabs();
+  openPanel('panel-schedule');
+}
+function switchLoc(loc) { currentLoc = loc; currentDay = 0; buildDayTabs(); buildShiftBoard(); updateLocTabs(); }
+function updateLocTabs() {
+  ['olis','emiliano','stallion'].forEach(l => {
+    const tab = document.getElementById('tab-'+l);
+    tab.className = 'loc-tab';
+    if (l === currentLoc) tab.classList.add('active-'+l);
+  });
+}
+function buildDayTabs() {
+  document.getElementById('day-tabs').innerHTML = weekDays.map((d,i) =>
+    `<button class="day-tab ${i===currentDay?'active':''}" onclick="switchDay(${i})">${d}</button>`
+  ).join('');
+}
+function switchDay(idx) { currentDay = idx; buildDayTabs(); buildShiftBoard(); }
+function buildShiftBoard() {
+  const board = document.getElementById('shift-board');
+  const data = scheduleData[currentLoc];
+  const dayShifts = data.filter(p => !['OFF','P.R.','R.O.','CLOSED','Office'].includes(p.shifts[currentDay]));
+  if (dayShifts.length === 0) {
+    board.innerHTML = `<div style="text-align:center;padding:32px;font-family:Arial,sans-serif;color:var(--muted);">${currentLoc==='stallion'&&(currentDay===4||currentDay===5)?'Stallion is closed Sunday & Monday.':'No shifts scheduled this day.'}</div>`;
+    return;
+  }
+  board.innerHTML = dayShifts.map(p => {
+    const shift = p.shifts[currentDay];
+    const totalHrs = p.hours.reduce((a,b)=>a+b,0);
+    return `<div class="shift-row" id="sr-${currentLoc}-${currentDay}-${p.name.replace(/\s/g,'-')}">
+      <div style="flex:1;min-width:180px;">
+        <div class="shift-name">${p.name} <span class="svb svb-${currentLoc}">${shift}</span></div>
+        <div class="shift-meta">${p.role} · ${weekDays[currentDay]} · ${totalHrs}hrs this week</div>
+      </div>
+      <button class="btn-shift-action btn-drop" onclick="initDrop('${p.name}','${currentLoc}',${currentDay},'${shift}',${totalHrs})">Drop Shift</button>
+    </div>`;
+  }).join('');
+}
+
+// Verify / drop
+let verifyShiftData = null;
+function initDrop(name, loc, dayIdx, shift, hrs) {
+  verifyShiftData = {name, loc, dayIdx, shift, hrs};
+  document.getElementById('verify-title').textContent = 'Drop this shift?';
+  document.getElementById('verify-desc').textContent = `Type your full name to confirm you want to drop your ${shift} shift on ${weekDays[dayIdx]}.`;
+  document.getElementById('verify-input').value = '';
+  document.getElementById('verify-error').textContent = '';
+  document.getElementById('verify-modal').classList.add('open');
+}
+function closeVerify() { document.getElementById('verify-modal').classList.remove('open'); verifyShiftData = null; }
+function confirmVerify() {
+  const entered = document.getElementById('verify-input').value.trim().toLowerCase();
+  if (entered !== verifyShiftData.name.toLowerCase()) {
+    document.getElementById('verify-error').textContent = 'Name does not match. Please try again.';
+    return;
+  }
+  closeVerify();
+  const {name, loc, dayIdx, shift} = verifyShiftData;
+  addToQueue(`${name} wants to DROP`, `${weekDays[dayIdx]} · ${shift} · ${capitalize(loc)}`, name);
+  const rowId = `sr-${loc}-${dayIdx}-${name.replace(/\s/g,'-')}`;
+  const btn = document.querySelector(`#${rowId} button`);
+  if (btn) { btn.textContent = 'Pending Approval'; btn.disabled = true; btn.style.opacity = '.5'; }
+}
+
+function addToQueue(label, detail) {
+  const req = {label, detail, id: Date.now()};
+  pendingRequests.push(req);
+  renderQueue();
+}
+function renderQueue() {
+  const list = document.getElementById('queue-list');
+  const count = document.getElementById('queue-count');
+  if (!list) return;
+  count.textContent = pendingRequests.length;
+  if (pendingRequests.length === 0) { list.innerHTML = '<div class="queue-empty">No pending requests — you\'re all caught up.</div>'; return; }
+  list.innerHTML = pendingRequests.map(req => `
+    <div class="queue-item" id="req-${req.id}">
+      <div class="q-info"><div class="q-name">${req.label}</div><div class="q-detail">${req.detail}</div></div>
+      <div class="queue-actions">
+        <button class="btn-approve" onclick="approveRequest(${req.id})">Approve</button>
+        <button class="btn-deny" onclick="denyRequest(${req.id})">Deny</button>
+      </div>
+    </div>`).join('');
+}
+function approveRequest(id) { pendingRequests = pendingRequests.filter(r => r.id !== id); renderQueue(); }
+function denyRequest(id) { pendingRequests = pendingRequests.filter(r => r.id !== id); renderQueue(); }
+
+// ── STAFF DB ──
+const ALL_ROLES = ['Server','Bartender','Busser','Host/Hostess','Manager','Asst. Manager','Owner'];
+const ALL_VENUES = ['Olis','Emiliano','Stallion',"Daniella's",'Marketplace','Oasis'];
+const ALL_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAY_ABBR = {Sun:'Sunday',Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday'};
+
+const defaultStaffDB = [
+  {name:'Dessalines Charles',role:['Server'],venues:['Olis','Stallion'],daysOff:'Tuesday',phone:''},
+  {name:'Prence',role:['Server'],venues:['Olis'],daysOff:'Monday',phone:''},
+  {name:'Pablo Montalvo',role:['Server'],venues:['Olis'],daysOff:'Tuesday',phone:''},
+  {name:'Aron Prime',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Lavander',role:['Server'],venues:['Olis'],daysOff:'Wednesday',phone:''},
+  {name:'Nicholas',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Lucas Santos',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Juanito',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Diego Alejandro',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Diego',role:['Server'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Darius',role:['Server','Manager'],venues:['Emiliano'],daysOff:'Tuesday, Thursday',phone:''},
+  {name:'Eli',role:['Server'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Bryce',role:['Server'],venues:['Emiliano'],daysOff:'Thursday, Monday, Tuesday',phone:''},
+  {name:'Crislady S',role:['Server'],venues:['Emiliano'],daysOff:'Monday, Wednesday',phone:''},
+  {name:'Devon Fernandez',role:['Server'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Kaylee Rangel',role:['Server'],venues:['Emiliano'],daysOff:'Tuesday, Wednesday, Sunday',phone:''},
+  {name:'T.J.',role:['Server'],venues:['Stallion','Emiliano'],daysOff:'Extended R.O.',phone:''},
+  {name:'Emiliano Gando',role:['Server'],venues:['Stallion'],daysOff:'',phone:''},
+  {name:'Jaden Jacobs',role:['Server'],venues:['Stallion'],daysOff:'',phone:''},
+  {name:'Sophia Heiden',role:['Server'],venues:['Stallion'],daysOff:'',phone:''},
+  {name:'Katherina Vigil',role:['Server'],venues:['Stallion'],daysOff:'',phone:''},
+  {name:'David',role:['Busser'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Zack',role:['Busser'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Luciano',role:['Busser'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Javier Storace',role:['Busser'],venues:['Olis','Emiliano'],daysOff:'',phone:''},
+  {name:'Denham Bryant',role:['Busser'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Anthony Oliviera',role:['Busser'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Isabella Richardson',role:['Host/Hostess'],venues:['Olis'],daysOff:'',phone:''},
+  {name:'Valeria',role:['Host/Hostess'],venues:['Olis'],daysOff:'Wednesday',phone:''},
+  {name:'Reiden Z.',role:['Host/Hostess'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Caydence',role:['Host/Hostess'],venues:['Stallion'],daysOff:'Wednesday',phone:''},
+  {name:'Olivia Zulijani',role:['Host/Hostess'],venues:['Stallion'],daysOff:'',phone:''},
+  {name:'Chey',role:['Bartender'],venues:['Stallion'],daysOff:'Sunday, Monday',phone:''},
+  {name:'Amanda Nunez',role:['Bartender'],venues:['Olis','Emiliano'],daysOff:'',phone:''},
+  {name:'Alex Rollo',role:['Bartender','Manager'],venues:['Emiliano'],daysOff:'Monday, Tuesday, Wednesday',phone:''},
+  {name:'Chole Haynes',role:['Bartender'],venues:['Emiliano'],daysOff:'',phone:''},
+  {name:'Hanna',role:['Bartender'],venues:['Olis','Emiliano'],daysOff:'',phone:''},
+  {name:'Kirsten Melock',role:['Bartender'],venues:['Olis'],daysOff:'Saturday',phone:''},
+  {name:'Juan Gando',role:['Manager','Owner'],venues:['Stallion','Emiliano'],daysOff:'Sunday',phone:''},
+  {name:'Oscar Vigil',role:['Manager'],venues:['Olis'],daysOff:'Rotating',phone:''},
+  {name:'Arturo Vigil',role:['Manager'],venues:['Olis'],daysOff:'Rotating',phone:''},
+  {name:'Andres Cardenas',role:['Manager'],venues:['Emiliano','Stallion'],daysOff:'',phone:''},
+  {name:'James Theros',role:['Manager'],venues:['Olis','Emiliano','Stallion'],daysOff:'',phone:''},
+];
+
+let staffDB = [...defaultStaffDB];
+
+async function loadStaffDB() {
+  const saved = await kvGet('staff_database');
+  if (saved && Array.isArray(saved)) staffDB = saved;
+  buildStaffDB();
+}
+
+async function saveStaffDB() {
+  const ind = document.getElementById('db-saving');
+  if (ind) ind.textContent = 'Saving…';
+  await kvSet('staff_database', staffDB);
+  if (ind) { ind.textContent = '✓ Saved'; setTimeout(() => ind.textContent = '', 2000); }
+}
+
+function buildStaffDB() {
+  const el = document.getElementById('staff-db-list');
+  if (!el) return;
+  const active = staffDB.filter(s => !s.inactive);
+  const inactive = staffDB.filter(s => s.inactive);
+  const renderList = (list, label) => {
+    if (!list.length) return '';
+    return `
+      ${label ? `<div style="font-family:Arial,sans-serif;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);margin:16px 0 8px;">${label} (${list.length})</div>` : ''}
+      ${list.map(s => {
+        const idx = staffDB.indexOf(s);
+        const permDaysArr = s.daysOff ? s.daysOff.split(',').map(d=>d.trim()).filter(Boolean) : [];
+        return `
+        <div class="staff-db-item" id="sdb-${idx}">
+          <div class="staff-db-row">
+            <div style="flex:1;min-width:160px;">
+              <div class="staff-db-name">${s.name}${s.inactive?'<span class="inactive-tag">Inactive</span>':''}</div>
+              <div class="staff-db-meta">${s.role.join(' / ')} · ${s.venues.join(', ')}${s.daysOff?' · Off: '+s.daysOff:''}${s.phone?' · '+s.phone:''}</div>
+            </div>
+            <button class="btn-edit-staff" onclick="toggleEditForm(${idx})">Edit</button>
+          </div>
+          <div class="staff-edit-form" id="edit-form-${idx}">
+            <div class="edit-row">
+              <div class="edit-field"><label>Full Name</label><input type="text" id="ef-name-${idx}" value="${s.name}" /></div>
+              <div class="edit-field"><label>Phone</label><input type="text" id="ef-phone-${idx}" value="${s.phone||''}" placeholder="(555) 000-0000" /></div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="font-family:Arial,sans-serif;font-size:.68rem;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;">Roles</div>
+              <div class="edit-chips" id="ef-roles-${idx}">${ALL_ROLES.map(r=>`<div class="edit-chip ${s.role.includes(r)?'selected':''}" onclick="toggleEditChip(this)">${r}</div>`).join('')}</div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="font-family:Arial,sans-serif;font-size:.68rem;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;">Locations</div>
+              <div class="edit-chips" id="ef-venues-${idx}">${ALL_VENUES.map(v=>`<div class="edit-chip ${s.venues.includes(v)?'selected':''}" onclick="toggleEditChip(this)">${v}</div>`).join('')}</div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="font-family:Arial,sans-serif;font-size:.68rem;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;">Permanent Days Off</div>
+              <div class="edit-chips" id="ef-days-${idx}">${ALL_DAYS.map(d=>`<div class="edit-chip ${permDaysArr.includes(d)?'selected':''}" onclick="toggleEditChip(this)">${d.slice(0,3)}</div>`).join('')}</div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save-staff" onclick="saveStaffMember(${idx})">Save</button>
+              <button class="btn-cancel-edit" onclick="toggleEditForm(${idx})">Cancel</button>
+              <button class="btn-deactivate" onclick="toggleActive(${idx})">${s.inactive?'Reactivate':'Deactivate'}</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}`;
+  };
+  el.innerHTML = renderList(active,'') + renderList(inactive,'Inactive Staff');
+}
+
+function toggleEditChip(el) { el.classList.toggle('selected'); }
+function toggleEditForm(idx) { document.getElementById(`edit-form-${idx}`).classList.toggle('open'); }
+
+async function saveStaffMember(idx) {
+  const name = document.getElementById(`ef-name-${idx}`).value.trim();
+  if (!name) { alert('Name cannot be empty.'); return; }
+  const roles = Array.from(document.querySelectorAll(`#ef-roles-${idx} .edit-chip.selected`)).map(c=>c.textContent);
+  const venues = Array.from(document.querySelectorAll(`#ef-venues-${idx} .edit-chip.selected`)).map(c=>c.textContent);
+  const days = Array.from(document.querySelectorAll(`#ef-days-${idx} .edit-chip.selected`)).map(c=>{
+    const map={Sun:'Sunday',Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday'};
+    return map[c.textContent]||c.textContent;
+  });
+  const phone = document.getElementById(`ef-phone-${idx}`).value.trim();
+  staffDB[idx] = {...staffDB[idx], name, role:roles.length?roles:['Staff'], venues:venues.length?venues:[], daysOff:days.join(', ')||'', phone};
+  await saveStaffDB();
+  buildStaffDB();
+}
+
+async function toggleActive(idx) {
+  staffDB[idx].inactive = !staffDB[idx].inactive;
+  await saveStaffDB();
+  buildStaffDB();
+}
+
+async function addNewStaff() {
+  staffDB.push({name:'New Staff Member',role:['Server'],venues:[],daysOff:'',phone:'',inactive:false});
+  await saveStaffDB();
+  buildStaffDB();
+  const newIdx = staffDB.length - 1;
+  setTimeout(() => {
+    const form = document.getElementById(`edit-form-${newIdx}`);
+    if (form) { form.classList.add('open'); form.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 100);
+}
+
+// ── BRAIN ──
+let brainHistory = [];
+let brainBusy = false;
+
+(function setDefaultWeek(){
+  const today = new Date();
+  const day = today.getDay();
+  const daysUntilWed = (3-day+7)%7||7;
+  const nextWed = new Date(today);
+  nextWed.setDate(today.getDate()+daysUntilWed);
+  const el = document.getElementById('brain-week-input');
+  if (el) el.value = nextWed.toISOString().split('T')[0];
+})();
+
+const SYSTEM_PROMPT = `You are the scheduling brain for a multi-venue restaurant group. Build and refine weekly staff schedules.
+
+VENUES (active): Olis (Oli's Fashion Cuisine), Emiliano (Emiliano Italian), Stallion (bar/lounge)
+VENUES (closed): Marketplace/JMP (summer), Daniella's, Oasis
+WORK WEEK: Wednesday to Tuesday
+STALLION: Closed Sunday and Monday. Open Wed/Thu/Fri/Sat/Tue. Reopens Sun/Mon in October.
+
+COVERAGE — OLIS:
+- 1 manager, 1 bartender, 1 busser every day
+- Sat & Sun: 2 bussers (extra for brunch)
+- 2 morning servers every day
+- Thursday dinner: 3 servers min; Sunday dinner: 2 servers only
+- Hostess: Fri/Sat/Sun only
+
+COVERAGE — EMILIANO:
+- 1 manager every day (no exceptions)
+- Exactly 1 bartender every day
+- 1 busser Thu/Fri/Sat/Sun only
+- Hostess: Fri/Sat/Sun only
+- Alex Rollo: "Bartender & Close" ONLY when Juan Gando is Emiliano manager. Otherwise "Bartender."
+
+COVERAGE — STALLION (open days):
+- 1 manager, 1 bartender every open day
+- 2 servers Friday dinner; no busser slow season
+
+OSCAR & ARTURO ROTATION:
+- Alternate Sundays. Reference: June 7 2026 = Arturo's Sunday.
+- Arturo's Sunday week: Arturo works Sunday Olis double manager. Oscar works other 6 days.
+- Oscar's Sunday week: Oscar works 5 shifts including Sunday with 2 consecutive days off. Arturo works exactly 2 night shifts (no Sunday).
+
+PRIORITY STAFF:
+- Dessalines Charles: 4-5 shifts/week Olis+Stallion (parent — priority)
+- Pablo Montalvo: 4-5 shifts/week
+- Diego A. Arteaga: 4-5 shifts/week
+- Katherina Gando: cannot work morning shift alone
+
+PERMANENT DAYS OFF:
+- Crislady S: Mon/Wed; Alex Rollo: Mon/Tue/Wed (except when Juan manages Emiliano Mon/Tue)
+- Darius: Tue/Thu; Kaylee Rangel: Tue/Wed/Sun; Bryce: Thu/Mon/Tue; Chey: Sun/Mon
+
+JUAN GANDO: 5 days/week — 3 days Stallion manager, Mon+Tue Emiliano manager. No Sunday.
+ANDRES CARDENAS: Max 2 days Stallion, rest Emiliano.
+
+RULES: No one over 40hrs (double=8.5hr, dinner=6hr, brunch=7hr, close=5hr). R.O./P.R. = do not schedule. Not employed: Todd Lufman, Jadyn Goodine, Alejandro Ortiz, Hunter Croke, Asher Mossburg. T.J.: R.O. through late June 2026.
+
+When drafting, auto-check: coverage, 40hr cap, Oscar/Arturo rotation, Alex Rollo label, priority staff shifts, Katherina not alone on mornings.`;
+
+function openBrain() { openPanel('panel-brain'); }
+
+function draftSchedule() {
+  const dateInput = document.getElementById('brain-week-input').value;
+  if (!dateInput) { alert('Please select a week start date.'); return; }
+  const d = new Date(dateInput+'T12:00:00');
+  if (d.getDay() !== 3) { alert('Please select a Wednesday.'); return; }
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const wdays = [];
+  for (let i=0;i<7;i++){const day=new Date(d);day.setDate(d.getDate()+i);wdays.push(`${days[day.getDay()]} ${day.getMonth()+1}/${day.getDate()}`);}
+  const weekLabel = `${wdays[0]} – ${wdays[6]}`;
+
+  // Pull time-off requests to include in prompt
+  const torSummary = timeOffRequests.length > 0
+    ? '\n\nCURRENT TIME-OFF REQUESTS FROM STAFF:\n' + timeOffRequests.map(r =>
+        `- ${r.name}: ${r.permDays&&r.permDays.length?'Permanent off '+r.permDays.join(',')+'. ':''}${r.dates&&r.dates.length?'Specific dates off: '+r.dates.join(', ')+'.':''} ${r.notes?'Notes: '+r.notes:''}`
+      ).join('\n')
+    : '';
+
+  sendToBrain(
+    `Draft the full weekly schedule for the week of ${weekLabel}. Apply all rules.${torSummary}\n\nAfter drafting, run all checks and flag anything that needs attention.`,
+    `Draft schedule for ${weekLabel}`
+  );
+}
+
+function quickMsg(text) { sendToBrain(text, text); }
+function sendBrainMessage() {
+  const input = document.getElementById('brain-input');
+  const text = input.value.trim();
+  if (!text || brainBusy) return;
+  input.value = ''; input.style.height = 'auto';
+  sendToBrain(text, text);
+}
+
+async function sendToBrain(message, displayMessage) {
+  if (brainBusy) return;
+  brainBusy = true;
+  brainHistory.push({role:'user',content:message});
+  appendMessage('user', displayMessage);
+  document.getElementById('btn-send').disabled = true;
+  document.getElementById('btn-draft-schedule').disabled = true;
+  const typingId = 'typing-'+Date.now();
+  appendTyping(typingId);
+  try {
+    const response = await fetch(WORKER, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:SYSTEM_PROMPT,messages:brainHistory})
+    });
+    removeTyping(typingId);
+    if (!response.ok) {
+      const err = await response.json();
+      appendMessage('assistant', `⚠️ Error: ${err.error?.message||'Something went wrong.'}`);
+      brainHistory.pop();
+    } else {
+      const data = await response.json();
+      const reply = data.content?.[0]?.text||'No response.';
+      brainHistory.push({role:'assistant',content:reply});
+      appendMessage('assistant', reply);
+    }
+  } catch(e) {
+    removeTyping(typingId);
+    appendMessage('assistant','⚠️ Could not reach the AI. Check your connection.');
+    brainHistory.pop();
+  }
+  brainBusy = false;
+  document.getElementById('btn-send').disabled = false;
+  document.getElementById('btn-draft-schedule').disabled = false;
+}
+
+function appendMessage(role, text) {
+  const container = document.getElementById('brain-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const formatted = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  div.innerHTML = `<div class="msg-avatar">${role==='assistant'?'🤖':'👤'}</div><div class="msg-bubble">${formatted}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function appendTyping(id) {
+  const container = document.getElementById('brain-messages');
+  const div = document.createElement('div');
+  div.className='msg assistant'; div.id=id;
+  div.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(div); container.scrollTop=container.scrollHeight;
+}
+function removeTyping(id) { const el=document.getElementById(id); if(el) el.remove(); }
+function capitalize(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
+</script>
+</body>
+</html>
